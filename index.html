@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .payment-method:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s ease;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading flex items-center justify-center">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Secure Payment Gateway</h1>
+                <p class="text-gray-600 mt-2">Amount to pay: ₹999.00</p>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <!-- UPI -->
+                <div class="payment-method bg-blue-50 p-4 rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-500">
+                    <div class="flex items-center">
+                        <i class="bi bi-phone text-2xl text-blue-600 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold">UPI</h3>
+                            <p class="text-sm text-gray-600">Pay using UPI apps</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div class="payment-method bg-green-50 p-4 rounded-lg cursor-pointer border-2 border-transparent hover:border-green-500">
+                    <div class="flex items-center">
+                        <i class="bi bi-credit-card text-2xl text-green-600 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold">Cards</h3>
+                            <p class="text-sm text-gray-600">Credit/Debit Cards</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Net Banking -->
+                <div class="payment-method bg-purple-50 p-4 rounded-lg cursor-pointer border-2 border-transparent hover:border-purple-500">
+                    <div class="flex items-center">
+                        <i class="bi bi-bank text-2xl text-purple-600 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold">Net Banking</h3>
+                            <p class="text-sm text-gray-600">All Indian banks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wallets -->
+                <div class="payment-method bg-orange-50 p-4 rounded-lg cursor-pointer border-2 border-transparent hover:border-orange-500">
+                    <div class="flex items-center">
+                        <i class="bi bi-wallet2 text-2xl text-orange-600 mr-3"></i>
+                        <div>
+                            <h3 class="font-semibold">Wallets</h3>
+                            <p class="text-sm text-gray-600">PhonePe, Paytm & more</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="text-center p-4 bg-gray-50 rounded-lg mb-8">
+                <h3 class="font-semibold mb-4">Scan QR Code to Pay</h3>
+                <div class="bg-white w-48 h-48 mx-auto flex items-center justify-center border-2">
+                    <i class="bi bi-qr-code text-6xl"></i>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <form id="paymentForm" class="space-y-4">
+                <div class="card-details hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="card-number">
+                            Card Number
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="card-number" type="text" placeholder="1234 5678 9012 3456" maxlength="16">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="expiry">
+                                Expiry Date
+                            </label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="expiry" type="text" placeholder="MM/YY">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="cvv">
+                                CVV
+                            </label>
+                            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="cvv" type="password" placeholder="123" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upi-details hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="upi-id">
+                            UPI ID
+                        </label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="upi-id" type="text" placeholder="username@upi">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                    Pay ₹999.00
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simulate payment processing
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+
+            // Simulate payment processing delay
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                alert('Payment processed successfully! (This is a demo)');
+            }, 2000);
+        });
+
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                // Reset all payment methods
+                document.querySelectorAll('.payment-method').forEach(m => {
+                    m.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'border-orange-500');
+                });
+
+                // Hide all payment details
+                document.querySelector('.card-details').classList.add('hidden');
+                document.querySelector('.upi-details').classList.add('hidden');
+
+                // Show relevant payment details based on selection
+                if (this.querySelector('h3').textContent === 'Cards') {
+                    document.querySelector('.card-details').classList.remove('hidden');
+                    this.classList.add('border-green-500');
+                } else if (this.querySelector('h3').textContent === 'UPI') {
+                    document.querySelector('.upi-details').classList.remove('hidden');
+                    this.classList.add('border-blue-500');
+                }
+            });
+        });
+
+        // Card number formatting
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV validation
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
